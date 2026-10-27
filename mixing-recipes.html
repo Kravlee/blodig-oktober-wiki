@@ -96,6 +96,46 @@
         white-space: nowrap;
       }
 
+      .price-book {
+        margin: 18px 0;
+        border: 3px solid #625d48;
+        background: #252820;
+        box-shadow: 5px 5px 0 var(--shadow);
+      }
+
+      .price-book summary {
+        padding: 12px;
+        color: #d3c8ae;
+        background: #292c22;
+        cursor: pointer;
+        font-weight: bold;
+      }
+
+      .price-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+        gap: 7px;
+        margin: 0;
+        padding: 0 12px 12px;
+        list-style: none;
+      }
+
+      .price-list li {
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+        padding: 7px;
+        border: 1px solid #625d48;
+        background: #181b16;
+        font-size: 11px;
+      }
+
+      .price-list strong,
+      .sale-price {
+        color: #d5bd79;
+        font-weight: bold;
+      }
+
       #search {
         width: 100%;
         min-width: 0;
@@ -237,6 +277,13 @@
         font-weight: bold;
       }
 
+      .sale-price {
+        display: block;
+        margin-top: 3px;
+        font-size: 10px;
+        line-height: 1.3;
+      }
+
       .note {
         margin-top: 20px;
         padding: 13px 15px;
@@ -303,6 +350,11 @@
         <span id="count" aria-live="polite"></span>
       </section>
 
+      <details class="price-book">
+        <summary id="price-list-title">General sell prices</summary>
+        <ul class="price-list" id="price-list"></ul>
+      </details>
+
       <section
         id="recipes"
         class="recipes"
@@ -314,6 +366,11 @@
           <strong>Mixing time:</strong> exact mixer durations from the recipe
           data. Codeine takes 22½ minutes (the game's button rounds this to 23
           minutes). Other inventory combinations are instant.
+        </p>
+        <p>
+          <strong>Prices:</strong> general item sell values from the game's
+          pricing function. “Not listed” means that function has no price for
+          that item.
         </p>
         <p>
           <strong>Item pictures:</strong> game artwork loads directly from
@@ -345,6 +402,50 @@
       const shroom = item("shroom", "Shroom", "shroom.png");
       const opium = item("opium", "Opium");
       const fullCan = item("wateringcan_full", "Full watering can");
+      const sellPrices = new Map([
+        ["cigarette", { name: "Cigarette", min: 1, max: 1 }],
+        ["pill", { name: "Pill", min: 3, max: 3 }],
+        ["kodimagnyl", { name: "Kodimagnyl", min: 2, max: 2 }],
+        ["lighter", { name: "Lighter", min: 1, max: 1 }],
+        ["cigbutt", { name: "Cigarette butt", min: 1, max: 1 }],
+        ["tobacco", { name: "Tobacco", min: 2, max: 2 }],
+        ["cigar", { name: "Cigar", min: 2, max: 2 }],
+        ["gun", { name: "Gun", min: 240, max: 240 }],
+        ["weedseed", { name: "Weed seed", min: 2, max: 2 }],
+        ["weed", { name: "Weed", min: 4, max: 6 }],
+        ["shroomspore", { name: "Shroom spore", min: 3, max: 3 }],
+        ["weakshroom", { name: "Weak shroom", min: 14, max: 14 }],
+        ["shroom", { name: "Shroom", min: 14, max: 14 }],
+        ["mix", { name: "Weed mix", min: 5, max: 5 }],
+        ["midweed", { name: "Mid weed", min: 7, max: 7 }],
+        ["thca", { name: "THC-A", min: 12, max: 12 }],
+        ["researchchem", { name: "Research chemical", min: 9, max: 9 }],
+        ["hash", { name: "Hash", min: 12, max: 12 }],
+        ["hashmix", { name: "Hash mix", min: 8, max: 8 }],
+        ["chudmix", { name: "Chud mix", min: 12, max: 12 }],
+        ["codeine", { name: "Codeine", min: 8, max: 8 }],
+        ["superpill", { name: "Fentanyl", min: 11, max: 11 }],
+        ["dmt", { name: "DMT", min: 28, max: 28 }],
+        ["lsd", { name: "LSD", min: 30, max: 30 }],
+        ["trollmix", { name: "Troldmand mix", min: 11, max: 11 }],
+        ["joint_troll", { name: "Troldmand joint", min: 16, max: 16 }],
+        ["blunt_troll", { name: "Troldmand blunt", min: 18, max: 18 }],
+        ["joint_chudname", { name: "Chud-name joint", min: 4, max: 4 }],
+        ["joint", { name: "Joint", min: 9, max: 9 }],
+        ["blunt", { name: "Blunt", min: 9, max: 9 }],
+        ["joint_mid", { name: "Mid joint", min: 10, max: 10 }],
+        ["blunt_mid", { name: "Mid blunt", min: 12, max: 12 }],
+        ["joint_thca", { name: "THC-A joint", min: 15, max: 15 }],
+        ["blunt_thca", { name: "THC-A blunt", min: 17, max: 17 }],
+        ["joint_chem", { name: "Research joint", min: 13, max: 13 }],
+        ["blunt_chem", { name: "Research blunt", min: 15, max: 15 }],
+        ["joint_hash", { name: "Hash joint", min: 13, max: 13 }],
+        ["joint_chud", { name: "Chud joint", min: 18, max: 18 }],
+        ["blunt_chud", { name: "Chud blunt", min: 20, max: 20 }],
+        ["syringe", { name: "Syringe", min: 1, max: 1 }],
+        ["iron", { name: "Iron", min: 3, max: 3 }],
+        ["wood", { name: "Wood", min: 2, max: 2 }],
+      ]);
       const recipes = [];
 
       function add(
@@ -597,6 +698,30 @@
       const recipeList = document.querySelector("#recipes");
       const count = document.querySelector("#count");
       const search = document.querySelector("#search");
+      const priceList = document.querySelector("#price-list");
+      const priceListTitle = document.querySelector("#price-list-title");
+
+      function formatPrice(price) {
+        return price.min === price.max
+          ? `${price.min} drops`
+          : `${price.min}–${price.max} drops`;
+      }
+
+      priceListTitle.textContent = `General sell prices (${sellPrices.size} items)`;
+      priceList.innerHTML = [...sellPrices.values()]
+        .sort((first, second) => first.name.localeCompare(second.name))
+        .map(
+          (price) =>
+            `<li><span>${price.name}</span><strong>${formatPrice(price)}</strong></li>`,
+        )
+        .join("");
+
+      function salePriceMarkup(itemData) {
+        const price = sellPrices.get(itemData.id);
+        return price
+          ? `<span class="sale-price">Sell: ${formatPrice(price)} each</span>`
+          : "";
+      }
 
       function iconMarkup(itemData) {
         const seed = [...itemData.id].reduce(
@@ -644,11 +769,11 @@
                   <span class="category">${recipe.group}</span>
                   <h2>Recipe ${index + 1}</h2>
                   <div class="formula">
-                    <div class="item">${iconMarkup(recipe.a)}<span class="item-name">${recipe.a.name}</span><span class="qty">${recipe.aQty > 1 ? `${recipe.aQty} needed` : ""}</span></div>
+                    <div class="item">${iconMarkup(recipe.a)}<span class="item-name">${recipe.a.name}</span>${salePriceMarkup(recipe.a)}<span class="qty">${recipe.aQty > 1 ? `${recipe.aQty} needed` : ""}</span></div>
                     <span class="operator" aria-hidden="true">+</span>
-                    <div class="item">${iconMarkup(recipe.b)}<span class="item-name">${recipe.b.name}</span><span class="qty">${recipe.bQty > 1 ? `${recipe.bQty} needed` : ""}</span></div>
+                    <div class="item">${iconMarkup(recipe.b)}<span class="item-name">${recipe.b.name}</span>${salePriceMarkup(recipe.b)}<span class="qty">${recipe.bQty > 1 ? `${recipe.bQty} needed` : ""}</span></div>
                     <span class="operator" aria-hidden="true">=</span>
-                    <div class="item">${iconMarkup(recipe.result)}<span class="item-name">${recipe.result.name}</span><span class="qty">${recipe.quantity} produced</span></div>
+                    <div class="item">${iconMarkup(recipe.result)}<span class="item-name">${recipe.result.name}</span>${salePriceMarkup(recipe.result)}<span class="qty">${recipe.quantity} produced</span></div>
                   </div>
                   <div class="details">
                     <span class="badge">${recipe.group === "Mixer" ? "Mix time" : "Combine"}: ${time}</span>
